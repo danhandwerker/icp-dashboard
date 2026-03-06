@@ -141,7 +141,18 @@ function DashboardContent() {
 
   return (
     <div className="space-y-6">
-      {/* Input Section */}
+      {/* Hero + Input Section */}
+      {!adjustedResult && !loading && (
+        <div className="text-center pt-8 pb-2 max-w-2xl mx-auto animate-fade-in">
+          <h1 className="text-3xl font-bold tracking-tight mb-3">ICP Scorer</h1>
+          <p className="text-sm text-white/50 leading-relaxed">
+            Score any brand against the Rokt Ads Ideal Customer Profile. AI enrichment analyzes industry fit,
+            offer strength, conversion cycle, budget, data readiness, and more to generate a fit grade,
+            spend projection, red flags, and a ready-to-use meeting brief.
+          </p>
+        </div>
+      )}
+
       <div className="max-w-2xl mx-auto animate-fade-in pt-1">
         <BrandInput onSubmit={handleScore} isLoading={loading} />
       </div>
