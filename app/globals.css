@@ -1,26 +1,233 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* ─── Rokt Brand Colors ─────────────────────────────────────── */
+  --color-beetroot: #C20075;
+  --color-beetroot-light: #E0008A;
+  --color-beetroot-bright: #E10098;
+  --color-wine: #480029;
+  --color-wine-light: #5a0035;
+  --color-wine-dark: #2d0019;
+  --color-rokt-k1: #420828;
+  --color-rokt-k2: #7d1345;
+
+  /* ─── Surfaces (dark mode layered) ──────────────────────────── */
+  --color-page: #0f1117;
+  --color-nav: #141720;
+  --color-surface: #181c28;
+  --color-surface-2: #1e2235;
+  --color-surface-3: #232840;
+  --color-card: #1a1525;
+  --color-card-deep: #150f1e;
+
+  /* ─── Functional Colors ─────────────────────────────────────── */
+  --color-grade-a: #10b981;
+  --color-grade-b: #3b82f6;
+  --color-grade-c: #f59e0b;
+  --color-grade-d: #f97316;
+  --color-grade-f: #ef4444;
+
+  /* ─── Fonts ─────────────────────────────────────────────────── */
+  --font-archivo: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-roboto-mono: "Roboto Mono", ui-monospace, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ─── Base Styles ───────────────────────────────────────────────── */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-archivo);
+  background: var(--color-page);
+  color: white;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Grain texture overlay */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(75, 85, 99, 0.5) transparent;
+}
+*::-webkit-scrollbar { height: 6px; width: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(75, 85, 99, 0.5); border-radius: 3px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(107, 114, 128, 0.7); }
+
+/* ─── Primary Button ────────────────────────────────────────────── */
+.btn-primary {
+  background: var(--color-beetroot);
+  color: white;
+  font-family: var(--font-archivo);
+  font-weight: 500;
+  border: 1px solid rgba(255, 100, 180, 0.2);
+  box-shadow:
+    0 4px 22px rgba(194, 0, 117, 0.55),
+    0 1px 4px rgba(0, 0, 0, 0.35);
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background: var(--color-beetroot-bright);
+  transform: scale(1.035);
+  box-shadow: 0 8px 40px rgba(225, 0, 152, 0.7);
+}
+.btn-primary:active {
+  transform: scale(0.95);
+  transition: 0.07s ease;
+}
+.btn-primary:disabled {
+  background: #2a2a3e;
+  color: #555568;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.07);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── Secondary Button ──────────────────────────────────────────── */
+.btn-secondary {
+  background: var(--color-surface-2);
+  color: white;
+  font-family: var(--font-archivo);
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background: var(--color-surface-3);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+/* ─── Card Styles ───────────────────────────────────────────────── */
+.card {
+  background: linear-gradient(135deg, var(--color-card), var(--color-card-deep));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+}
+.card-surface {
+  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+}
+
+/* ─── Grade Colors ──────────────────────────────────────────────── */
+.grade-a { color: var(--color-grade-a); }
+.grade-b { color: var(--color-grade-b); }
+.grade-c { color: var(--color-grade-c); }
+.grade-d { color: var(--color-grade-d); }
+.grade-f { color: var(--color-grade-f); }
+
+.grade-a-bg { background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); }
+.grade-b-bg { background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.3); }
+.grade-c-bg { background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.3); }
+.grade-d-bg { background: rgba(249, 115, 22, 0.15); border-color: rgba(249, 115, 22, 0.3); }
+.grade-f-bg { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); }
+
+/* ─── Churn Risk Badges ─────────────────────────────────────────── */
+.risk-low { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+.risk-medium { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+.risk-high { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+/* ─── Slider Styles ─────────────────────────────────────────────── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, var(--color-beetroot), var(--color-surface-3));
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: var(--color-beetroot-light);
+  margin-top: -7px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(194, 0, 117, 0.5);
+  transition: transform 0.15s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* ─── Animations ────────────────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 4px 22px rgba(194, 0, 117, 0.55); }
+  50% { box-shadow: 0 4px 30px rgba(194, 0, 117, 0.75); }
+}
+@keyframes score-fill {
+  from { width: 0%; }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in { animation: fade-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-slide-up { animation: slide-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-pulse-glow { animation: pulse-glow 2.8s ease-in-out infinite; }
+.animate-score-fill { animation: score-fill 1s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--color-surface) 25%, var(--color-surface-2) 50%, var(--color-surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.5rem;
+}
+
+/* ─── Input Styles ──────────────────────────────────────────────── */
+.input-brand {
+  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  color: white;
+  font-family: var(--font-archivo);
+  transition: all 0.2s ease;
+}
+.input-brand:focus {
+  outline: none;
+  border-color: var(--color-beetroot-light);
+  box-shadow: 0 0 0 3px rgba(224, 0, 138, 0.22);
+}
+.input-brand::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ─── Confidence Badge ──────────────────────────────────────────── */
+.confidence-high { background: rgba(16, 185, 129, 0.12); color: #6ee7b7; }
+.confidence-medium { background: rgba(245, 158, 11, 0.12); color: #fcd34d; }
+.confidence-low { background: rgba(239, 68, 68, 0.12); color: #fca5a5; }
+
+/* ─── Stagger delays ────────────────────────────────────────────── */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+.delay-6 { animation-delay: 0.6s; }
+.delay-7 { animation-delay: 0.7s; }
+.delay-8 { animation-delay: 0.8s; }
