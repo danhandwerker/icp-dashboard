@@ -12,6 +12,8 @@ export interface DimensionScore {
   rationale: string;
   selectedOption: string;
   options: DimensionOption[];
+  optional?: boolean;
+  active?: boolean;
 }
 
 export interface DimensionOption {
@@ -68,6 +70,8 @@ export interface BrandEnrichment {
 export interface ScoreResult {
   brand: string;
   totalScore: number;
+  maxPossibleScore: number;
+  scorePercent: number;
   grade: Grade;
   churnRisk: ChurnRisk;
   churnRiskDetail: string;

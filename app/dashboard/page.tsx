@@ -14,6 +14,8 @@ import LoadingState from "@/components/LoadingState";
 import { ScoreResult } from "@/lib/types";
 import {
   computeScore,
+  computeMaxPossible,
+  computeScorePercent,
   getGrade,
   getChurnRisk,
   predictSpend,
@@ -22,6 +24,31 @@ import {
 } from "@/lib/scoring";
 import { Bookmark, BookmarkCheck, Link2, Pencil, Check } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
+
+function recalcResult(base: ScoreResult, newDimensions: ScoreResult["dimensions"]): ScoreResult {
+  const totalScore = computeScore(newDimensions);
+  const maxPossibleScore = computeMaxPossible(newDimensions);
+  const scorePercent = computeScorePercent(newDimensions);
+  const grade = getGrade(scorePercent);
+  const { risk: churnRisk, detail: churnRiskDetail } = getChurnRisk(totalScore, newDimensions);
+  const predictedAnnualSpend = predictSpend(scorePercent);
+  const redFlags = detectRedFlags(newDimensions);
+  const recommendations = generateRecommendations(newDimensions);
+
+  return {
+    ...base,
+    dimensions: newDimensions,
+    totalScore,
+    maxPossibleScore,
+    scorePercent,
+    grade,
+    churnRisk,
+    churnRiskDetail,
+    predictedAnnualSpend,
+    redFlags,
+    recommendations,
+  };
+}
 
 function DashboardContent() {
   const [result, setResult] = useState<ScoreResult | null>(null);
@@ -61,7 +88,6 @@ function DashboardContent() {
       setResult(data);
       setAdjustedResult(data);
 
-      // Update URL so the scored brand is shareable
       window.history.replaceState({}, "", `?brand=${encodeURIComponent(brand)}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -70,7 +96,6 @@ function DashboardContent() {
     }
   }, []);
 
-  // Auto-score from URL param on first load
   useEffect(() => {
     const brandParam = searchParams.get("brand");
     if (brandParam && !result && !loading && !autoScoredRef.current) {
@@ -86,31 +111,26 @@ function DashboardContent() {
 
       const newDimensions = adjustedResult.dimensions.map((d) =>
         d.id === dimensionId
-          ? { ...d, score: newScore, selectedOption: newLabel }
+          ? { ...d, score: newScore, selectedOption: newLabel, active: true }
           : d
       );
 
-      const totalScore = computeScore(newDimensions);
-      const grade = getGrade(totalScore);
-      const { risk: churnRisk, detail: churnRiskDetail } = getChurnRisk(
-        totalScore,
-        newDimensions
-      );
-      const predictedAnnualSpend = predictSpend(totalScore);
-      const redFlags = detectRedFlags(newDimensions);
-      const recommendations = generateRecommendations(newDimensions);
+      setAdjustedResult(recalcResult(adjustedResult, newDimensions));
+    },
+    [adjustedResult]
+  );
 
-      setAdjustedResult({
-        ...adjustedResult,
-        dimensions: newDimensions,
-        totalScore,
-        grade,
-        churnRisk,
-        churnRiskDetail,
-        predictedAnnualSpend,
-        redFlags,
-        recommendations,
-      });
+  const handleToggleActive = useCallback(
+    (dimensionId: string, active: boolean) => {
+      if (!adjustedResult) return;
+
+      const newDimensions = adjustedResult.dimensions.map((d) =>
+        d.id === dimensionId
+          ? { ...d, active, score: active ? d.score : 0, selectedOption: active ? d.selectedOption : "" }
+          : d
+      );
+
+      setAdjustedResult(recalcResult(adjustedResult, newDimensions));
     },
     [adjustedResult]
   );
@@ -137,7 +157,7 @@ function DashboardContent() {
   };
 
   const isAdjusted =
-    result && adjustedResult && result.totalScore !== adjustedResult.totalScore;
+    result && adjustedResult && result.scorePercent !== adjustedResult.scorePercent;
 
   return (
     <div className="space-y-6">
@@ -147,8 +167,8 @@ function DashboardContent() {
           <h1 className="text-3xl font-bold tracking-tight mb-3">ICP Scorer</h1>
           <p className="text-sm text-white/50 leading-relaxed">
             Score any brand against the Rokt Ads Ideal Customer Profile. AI enrichment analyzes industry fit,
-            offer strength, conversion cycle, budget, data readiness, and more to generate a fit grade,
-            spend projection, red flags, and a ready-to-use meeting brief.
+            conversion cycle, audience alignment, and more. Optional dimensions (offer strength, budget, data readiness)
+            are excluded until you provide them, giving you a score that reflects what you actually know.
           </p>
         </div>
       )}
@@ -277,6 +297,8 @@ function DashboardContent() {
                 <ScoreCard
                   brand={adjustedResult.brand}
                   totalScore={adjustedResult.totalScore}
+                  maxPossibleScore={adjustedResult.maxPossibleScore}
+                  scorePercent={adjustedResult.scorePercent}
                   grade={adjustedResult.grade}
                   churnRisk={adjustedResult.churnRisk}
                   churnRiskDetail={adjustedResult.churnRiskDetail}
@@ -322,18 +344,19 @@ function DashboardContent() {
 
               {/* Dimension Sliders */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">
+                <h3 className="text-lg font-semibold mb-1">
                   Scoring dimensions
-                  <span className="text-sm font-normal text-gray-400 ml-2">
-                    Adjust to see what-if scenarios
-                  </span>
                 </h3>
+                <p className="text-sm text-gray-400 mb-4">
+                  Adjust to see what-if scenarios. Grayed-out dimensions are excluded from the score until you select a value.
+                </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {adjustedResult.dimensions.map((dim) => (
                     <DimensionCard
                       key={dim.id}
                       dimension={dim}
                       onChange={handleDimensionChange}
+                      onToggleActive={handleToggleActive}
                     />
                   ))}
                 </div>

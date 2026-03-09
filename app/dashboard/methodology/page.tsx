@@ -13,8 +13,10 @@ export default function MethodologyPage() {
         <p className="text-sm text-gray-400 leading-relaxed max-w-2xl">
           The Rokt Ads ICP Dashboard scores prospects across 8 dimensions derived from
           analysis of Rokt's top-performing advertisers, the FY27Q1 Churn
-          Analysis, and internal GTM handbooks. Here's exactly how each score is
-          calculated.
+          Analysis, and internal GTM handbooks. Three dimensions (Offer Strength,
+          Budget & Scale, Data & Integration) are optional — excluded from the score
+          until you fill them in. The grade is always a percentage of whatever
+          dimensions are active.
         </p>
       </div>
 
@@ -67,13 +69,20 @@ export default function MethodologyPage() {
       <section className="space-y-4">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Target className="w-5 h-5 text-beetroot-light" />
-          Scoring dimensions (100 points total)
+          Scoring dimensions (100 points total, dynamic denominator)
         </h2>
         <div className="space-y-3">
           {DIMENSIONS.map((dim) => (
             <div key={dim.id} className="card p-5 space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold">{dim.name}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold">{dim.name}</h3>
+                  {dim.optional && (
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-white/5 text-white/40 border border-white/10">
+                      Optional
+                    </span>
+                  )}
+                </div>
                 <span className="text-xs font-mono text-gray-400">
                   0-{dim.maxScore} pts
                 </span>
@@ -105,11 +114,11 @@ export default function MethodologyPage() {
         </h2>
         <div className="space-y-2">
           {[
-            { grade: "A", range: "85-100", spend: "$5M - $50M+", desc: "Exceptional fit, fast-track sales", color: "grade-a" },
-            { grade: "B", range: "70-84", spend: "$1M - $10M", desc: "Strong fit, high priority prospect", color: "grade-b" },
-            { grade: "C", range: "55-69", spend: "$200k - $2M", desc: "Good fit with addressable gaps", color: "grade-c" },
-            { grade: "D", range: "40-54", spend: "$50k - $500k", desc: "Moderate fit, needs specific conditions", color: "grade-d" },
-            { grade: "F", range: "0-39", spend: "<$100k", desc: "Poor fit, deprioritize", color: "grade-f" },
+            { grade: "A", range: "85-100%", spend: "$5M - $50M+", desc: "Exceptional fit, fast-track sales", color: "grade-a" },
+            { grade: "B", range: "70-84%", spend: "$1M - $10M", desc: "Strong fit, high priority prospect", color: "grade-b" },
+            { grade: "C", range: "55-69%", spend: "$200k - $2M", desc: "Good fit with addressable gaps", color: "grade-c" },
+            { grade: "D", range: "40-54%", spend: "$50k - $500k", desc: "Moderate fit, needs specific conditions", color: "grade-d" },
+            { grade: "F", range: "0-39%", spend: "<$100k", desc: "Poor fit, deprioritize", color: "grade-f" },
           ].map((g) => (
             <div
               key={g.grade}

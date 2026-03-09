@@ -92,7 +92,7 @@ export default function PortfolioPage() {
   };
 
   const sorted = [...results].sort((a, b) => {
-    if (sortBy === "score") return b.totalScore - a.totalScore;
+    if (sortBy === "score") return b.scorePercent - a.scorePercent;
     if (sortBy === "spend")
       return b.predictedAnnualSpend.mid - a.predictedAnnualSpend.mid;
     // risk: high first
@@ -115,7 +115,7 @@ export default function PortfolioPage() {
 
   const avgScore =
     results.length > 0
-      ? Math.round(results.reduce((s, r) => s + r.totalScore, 0) / results.length)
+      ? Math.round(results.reduce((s, r) => s + r.scorePercent, 0) / results.length)
       : 0;
 
   const downloadCSV = () => {
@@ -140,7 +140,7 @@ export default function PortfolioPage() {
       r.brand,
       r.enrichment.industry,
       r.enrichment.subIndustry,
-      r.totalScore,
+      `${r.scorePercent}%`,
       r.grade,
       r.churnRisk,
       r.predictedAnnualSpend.mid,
@@ -254,7 +254,7 @@ export default function PortfolioPage() {
               <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
                 <TrendingUp className="w-3 h-3" /> Avg score
               </div>
-              <div className="text-2xl font-bold">{avgScore}</div>
+              <div className="text-2xl font-bold">{avgScore}%</div>
             </div>
             <div className="card-surface p-4">
               <div className="text-xs text-gray-500 mb-1">Total predicted spend</div>
@@ -339,11 +339,11 @@ export default function PortfolioPage() {
                           <div className="w-16 h-1.5 rounded-full bg-surface-3 overflow-hidden">
                             <div
                               className="h-full rounded-full bg-beetroot"
-                              style={{ width: `${r.totalScore}%` }}
+                              style={{ width: `${r.scorePercent}%` }}
                             />
                           </div>
                           <span className="font-mono text-xs">
-                            {r.totalScore}
+                            {r.scorePercent}%
                           </span>
                         </div>
                       </td>

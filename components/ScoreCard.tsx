@@ -7,6 +7,8 @@ import BrandLogo from "./BrandLogo";
 interface ScoreCardProps {
   brand: string;
   totalScore: number;
+  maxPossibleScore: number;
+  scorePercent: number;
   grade: Grade;
   churnRisk: ChurnRisk;
   churnRiskDetail: string;
@@ -57,13 +59,15 @@ const GRADE_GLOW: Record<Grade, string> = {
 export default function ScoreCard({
   brand,
   totalScore,
+  maxPossibleScore,
+  scorePercent,
   grade,
   churnRisk,
   churnRiskDetail,
   confidence,
   website,
 }: ScoreCardProps) {
-  const [displayScore, setDisplayScore] = useState(0);
+  const [displayPercent, setDisplayPercent] = useState(0);
   const [strokeOffset, setStrokeOffset] = useState(283);
   const animFrameRef = useRef<number | null>(null);
 
@@ -76,9 +80,9 @@ export default function ScoreCard({
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      const current = Math.round(eased * totalScore);
-      setDisplayScore(current);
-      setStrokeOffset(circumference - (circumference * eased * totalScore) / 100);
+      const current = Math.round(eased * scorePercent);
+      setDisplayPercent(current);
+      setStrokeOffset(circumference - (circumference * eased * scorePercent) / 100);
       if (progress < 1) {
         animFrameRef.current = requestAnimationFrame(tick);
       }
@@ -88,7 +92,7 @@ export default function ScoreCard({
     return () => {
       if (animFrameRef.current !== null) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [totalScore]);
+  }, [scorePercent]);
 
   const gradeColor = GRADE_COLORS[grade];
   const gradeGlow = GRADE_GLOW[grade];
@@ -147,9 +151,9 @@ export default function ScoreCard({
               className="text-2xl font-bold tabular-nums"
               style={{ color: gradeColor, lineHeight: 1 }}
             >
-              {displayScore}
+              {displayPercent}%
             </span>
-            <span className="text-[10px] text-white/40 mt-0.5">/ 100</span>
+            <span className="text-[10px] text-white/40 mt-0.5">{totalScore}/{maxPossibleScore}</span>
           </div>
         </div>
 

@@ -18,40 +18,48 @@ interface DimensionDef {
   maxScore: number;
   description: string;
   options: DimensionOption[];
+  optional?: boolean;
 }
 
 export const DIMENSIONS: DimensionDef[] = [
   {
     id: "industry",
     name: "Industry Fit",
-    maxScore: 20,
+    maxScore: 32,
     description:
-      "How well the brand's vertical maps to Rokt's proven top-performing advertiser categories.",
+      "How well the brand's vertical maps to Rokt's proven top-performing advertiser categories. Transaction-moment advertising works best for performance-oriented consumer brands with clear digital conversion events.",
     options: [
-      { label: "Finance / Fintech", value: 20, description: "Credit cards, banking, payments, lending" },
-      { label: "Streaming / Media", value: 18, description: "Video, music, podcasts, news subscriptions" },
-      { label: "Food Delivery / Meal Kits / QSR", value: 17, description: "DoorDash, HelloFresh, restaurant chains" },
-      { label: "Retail / E-commerce", value: 17, description: "Online & omnichannel retailers" },
-      { label: "Insurance", value: 15, description: "Auto, home, pet, health insurance" },
-      { label: "Gaming / Betting", value: 14, description: "Online gaming, sports betting, casino" },
-      { label: "Travel / Hospitality", value: 14, description: "Airlines, hotels, OTAs, vacation rentals" },
-      { label: "Nonprofit / Charity", value: 13, description: "Charitable organizations, fundraising" },
-      { label: "Pet / Animal", value: 16, description: "Pet food, pet health, pet products (Farmer's Dog, BarkBox, Chewy)" },
-      { label: "Health / Beauty / Wellness", value: 13, description: "DTC beauty, telehealth, fitness, skincare" },
-      { label: "Subscription / DTC", value: 13, description: "D2C subscription boxes, consumer apps, membership products" },
-      { label: "Telecom", value: 11, description: "Mobile carriers, internet providers (ClearLink, Mint Mobile)" },
-      { label: "Automotive", value: 10, description: "Car sales, financing, parts" },
-      { label: "Education", value: 9, description: "EdTech, online learning" },
-      { label: "Other Consumer", value: 7, description: "Consumer brands not listed above" },
-      { label: "B2B", value: 4, description: "Business-to-business products and services" },
+      { label: "Finance / Fintech", value: 32, description: "Credit cards, banking, payments, lending (Capital One, PayPal)" },
+      { label: "Streaming / Media", value: 29, description: "Video, music, podcasts, news subscriptions (Disney+, Apple TV+)" },
+      { label: "Food Delivery / Meal Kits / QSR", value: 27, description: "DoorDash, HelloFresh, restaurant chains" },
+      { label: "Online Retail / E-commerce", value: 27, description: "Online & omnichannel retailers with digital checkout (Sam's Club, BJ's)" },
+      { label: "Pet / Animal", value: 26, description: "Pet food, pet health, pet products (Farmer's Dog, BarkBox, Chewy)" },
+      { label: "Insurance", value: 24, description: "Auto, home, pet, health insurance (Super, Asurifi)" },
+      { label: "Subscription / DTC", value: 24, description: "D2C subscription boxes, consumer apps, membership products" },
+      { label: "Nonprofit / Charity", value: 22, description: "Charitable organizations, fundraising (ASPCA, St. Jude)" },
+      { label: "Gaming / Betting", value: 20, description: "Online gaming, sports betting, casino (BetMGM)" },
+      { label: "Travel / Hospitality", value: 20, description: "Airlines, hotels, OTAs, vacation rentals (Booking.com)" },
+      { label: "Health / Beauty / Wellness", value: 18, description: "DTC beauty, telehealth, fitness, skincare" },
+      { label: "Telecom", value: 16, description: "Mobile carriers, internet providers (Mint Mobile)" },
+      { label: "Education", value: 12, description: "EdTech, online learning — longer consideration cycles" },
+      { label: "Grocery / Supermarket", value: 10, description: "Thin margins, geo constraints, habit switching, limited digital conversion" },
+      { label: "Other Consumer", value: 8, description: "Consumer brands not fitting other categories" },
+      { label: "Automotive", value: 8, description: "Long purchase cycle, lead-gen only, delayed attribution, no transaction-moment fit" },
+      { label: "Luxury / Premium", value: 6, description: "Anti-performance DNA, exclusivity conflicts, high-friction conversion" },
+      { label: "Real Estate / Home Services", value: 5, description: "Long cycle, local, low frequency, offline conversion" },
+      { label: "Pharma / Prescription", value: 3, description: "FDA fair-balance requirements, no online Rx path, HIPAA constraints" },
+      { label: "B2B / Enterprise", value: 3, description: "Wrong audience — e-commerce shoppers are consumers, not business buyers" },
+      { label: "Government / Public Sector", value: 3, description: "No ROI metric, slow approval chains, no outcome-based pricing fit" },
+      { label: "Brand Awareness Only", value: 0, description: "No performance goal — fundamentally misaligned with Rokt Ads" },
     ],
   },
   {
     id: "offer",
     name: "Offer Strength",
     maxScore: 15,
+    optional: true,
     description:
-      "The quality and type of offer the brand can present. RoktGPT identifies offer strength as the single biggest lever for advertiser success.",
+      "The quality and type of offer the brand can present. RoktGPT identifies offer strength as the single biggest lever for advertiser success. Leave blank until known.",
     options: [
       { label: "Cash reward / Cashback", value: 15, description: "Direct monetary incentive ($X back)" },
       { label: "Free trial (streaming/subscription)", value: 14, description: "Try free for X days/months" },
@@ -68,56 +76,58 @@ export const DIMENSIONS: DimensionDef[] = [
   {
     id: "conversion_cycle",
     name: "Conversion Cycle",
-    maxScore: 15,
+    maxScore: 10,
     description:
       "How quickly the end consumer converts after engaging. Short cycles strongly predict retention: 15 conversions by Day 4 = 38% lower churn.",
     options: [
-      { label: "Instant / same-session", value: 15, description: "Click -> purchase/signup immediately" },
-      { label: "Short (1-3 days)", value: 12, description: "App download -> first use, quick signup" },
-      { label: "Medium (1-2 weeks)", value: 9, description: "Free trial -> subscribe, considered purchase" },
-      { label: "Long (2-4 weeks)", value: 6, description: "Insurance quote -> bind, account approval" },
-      { label: "Very long (30+ days)", value: 3, description: "First deposit, policy activation, enterprise" },
+      { label: "Instant / same-session", value: 10, description: "Click -> purchase/signup immediately" },
+      { label: "Short (1-3 days)", value: 8, description: "App download -> first use, quick signup" },
+      { label: "Medium (1-2 weeks)", value: 5, description: "Free trial -> subscribe, considered purchase" },
+      { label: "Long (2-4 weeks)", value: 3, description: "Insurance quote -> bind, account approval" },
+      { label: "Very long (30+ days)", value: 1, description: "First deposit, policy activation, enterprise" },
     ],
   },
   {
     id: "budget",
     name: "Budget & Scale",
-    maxScore: 15,
+    maxScore: 12,
+    optional: true,
     description:
-      "Sufficient budget and realistic targets for Rokt's learning phase. Typical new advertiser tests range $20-100k. Unrealistic CPA/ROAS targets cause 34% of all churn.",
+      "Sufficient budget and realistic targets for Rokt's learning phase. Typical new advertiser tests range $20-100k. Unrealistic CPA/ROAS targets cause 34% of all churn. Leave blank until known.",
     options: [
-      { label: "$300k+ test with performance guarantee", value: 15, description: "Enterprise commitment (Farmer's Dog, E*TRADE pattern)" },
-      { label: "$100-300k, 60+ day runway", value: 13, description: "Strong test budget, room for smart bidding to learn" },
-      { label: "$50-100k, 30-60 days", value: 10, description: "Solid mid-range test (Westpac, Fanatics pattern)" },
-      { label: "$20-50k, 30+ days", value: 7, description: "Typical small-mid test (Disney MX, PlayStar pattern)" },
-      { label: "<$20k or <30 days", value: 3, description: "Very small test, limited learning window" },
+      { label: "$300k+ test with performance guarantee", value: 12, description: "Enterprise commitment (Farmer's Dog, E*TRADE pattern)" },
+      { label: "$100-300k, 60+ day runway", value: 10, description: "Strong test budget, room for smart bidding to learn" },
+      { label: "$50-100k, 30-60 days", value: 8, description: "Solid mid-range test (Westpac, Fanatics pattern)" },
+      { label: "$20-50k, 30+ days", value: 5, description: "Typical small-mid test (Disney MX, PlayStar pattern)" },
+      { label: "<$20k or <30 days", value: 2, description: "Very small test, limited learning window" },
     ],
   },
   {
     id: "data_integration",
     name: "Data & Integration Readiness",
     maxScore: 12,
+    optional: true,
     description:
-      "Tracking maturity and close-the-loop (CTL) capability. Poor CTL blocks downstream optimization — the root cause of 46% of regrettable churn.",
+      "Tracking maturity and close-the-loop (CTL) capability. Poor CTL blocks downstream optimization — the root cause of 46% of regrettable churn. Leave blank until known.",
     options: [
       { label: "S2S + CDP + strong CTL", value: 12, description: "Best-in-class measurement infrastructure" },
       { label: "S2S or CDP with good event coverage", value: 10, description: "Strong server-side tracking" },
       { label: "Standard pixel + conversion tracking", value: 7, description: "Basic but functional tracking" },
-      { label: "Basic web analytics only", value: 4, description: "GA only, no server-side" },
-      { label: "No tracking infrastructure", value: 1, description: "Would need to build from scratch" },
+      { label: "Basic web analytics only", value: 3, description: "GA only, no server-side" },
+      { label: "No tracking infrastructure", value: 0, description: "Would need to build from scratch" },
     ],
   },
   {
     id: "measurement",
     name: "Measurement Alignment",
-    maxScore: 8,
+    maxScore: 6,
     description:
       "Whether the brand's attribution approach will align with Rokt's. The SoFi pattern: internal measurement tools that disagree with Rokt erode trust and cause churn.",
     options: [
-      { label: "Standard attribution, open to Rokt reporting", value: 8, description: "GA, MMPs, will trust Rokt data" },
-      { label: "Has internal tools but flexible", value: 6, description: "Own system but willing to reconcile" },
-      { label: "Rigid internal attribution", value: 3, description: "Proprietary system, may conflict" },
-      { label: "Known measurement friction", value: 1, description: "Won't trust external measurement" },
+      { label: "Standard attribution, open to Rokt reporting", value: 6, description: "GA, MMPs, will trust Rokt data" },
+      { label: "Has internal tools but flexible", value: 4, description: "Own system but willing to reconcile" },
+      { label: "Rigid internal attribution", value: 2, description: "Proprietary system, may conflict" },
+      { label: "Known measurement friction", value: 0, description: "Won't trust external measurement" },
     ],
   },
   {
@@ -129,41 +139,60 @@ export const DIMENSIONS: DimensionDef[] = [
     options: [
       { label: "Broad consumer, mass market", value: 8, description: "Appeals to wide Rokt audience" },
       { label: "Large but somewhat targeted", value: 6, description: "Specific demo but still large reach" },
-      { label: "Niche consumer audience", value: 4, description: "Narrow targeting requirements" },
-      { label: "B2B or very narrow", value: 2, description: "Limited match to Rokt supply" },
+      { label: "Niche consumer audience", value: 3, description: "Narrow targeting requirements" },
+      { label: "B2B or very narrow", value: 0, description: "Limited match to Rokt supply" },
     ],
   },
   {
     id: "regulatory",
     name: "Regulatory Environment",
-    maxScore: 7,
+    maxScore: 5,
     description:
       "Regulatory constraints that limit the use of Rokt's audience and optimization tools. Mistplay and Phia churned due to industry regulations blocking advanced targeting.",
     options: [
-      { label: "No regulatory constraints", value: 7, description: "Standard consumer marketing" },
-      { label: "Minor constraints (age gating)", value: 5, description: "Age verification, minor disclosures" },
-      { label: "Moderate (financial, health disclosures)", value: 4, description: "Required disclaimers but can target" },
-      { label: "Heavy (gambling, pharma, cannabis)", value: 2, description: "Significant targeting limitations" },
+      { label: "No regulatory constraints", value: 5, description: "Standard consumer marketing" },
+      { label: "Minor constraints (age gating)", value: 3, description: "Age verification, minor disclosures" },
+      { label: "Moderate (financial, health disclosures)", value: 2, description: "Required disclaimers but can target" },
+      { label: "Heavy (gambling, pharma, cannabis)", value: 0, description: "Significant targeting limitations" },
     ],
   },
 ];
 
 // ─── Scoring Logic ───────────────────────────────────────────────────────────
 
+/** Sum scores for active dimensions only */
 export function computeScore(dimensions: DimensionScore[]): number {
-  return dimensions.reduce((sum, d) => sum + d.score, 0);
+  return dimensions
+    .filter((d) => !d.optional || d.active)
+    .reduce((sum, d) => sum + d.score, 0);
 }
 
-export function getGrade(score: number): Grade {
-  if (score >= 85) return "A";
-  if (score >= 70) return "B";
-  if (score >= 55) return "C";
-  if (score >= 40) return "D";
+/** Sum maxScore for active dimensions only (dynamic denominator) */
+export function computeMaxPossible(dimensions: DimensionScore[]): number {
+  return dimensions
+    .filter((d) => !d.optional || d.active)
+    .reduce((sum, d) => sum + d.maxScore, 0);
+}
+
+/** Score as percentage of dynamic denominator */
+export function computeScorePercent(dimensions: DimensionScore[]): number {
+  const max = computeMaxPossible(dimensions);
+  if (max === 0) return 0;
+  return Math.round((computeScore(dimensions) / max) * 100);
+}
+
+/** Grade based on percentage of dynamic denominator */
+export function getGrade(scoreOrPercent: number, dimensions?: DimensionScore[]): Grade {
+  const pct = dimensions ? computeScorePercent(dimensions) : scoreOrPercent;
+  if (pct >= 85) return "A";
+  if (pct >= 70) return "B";
+  if (pct >= 55) return "C";
+  if (pct >= 40) return "D";
   return "F";
 }
 
 export function getChurnRisk(
-  score: number,
+  _score: number,
   dimensions: DimensionScore[]
 ): { risk: ChurnRisk; detail: string } {
   const convCycle = dimensions.find((d) => d.id === "conversion_cycle");
@@ -174,8 +203,9 @@ export function getChurnRisk(
   // Specific high-risk patterns from churn report
   if (
     convCycle &&
-    convCycle.score <= 6 &&
+    convCycle.score <= 3 &&
     dataInt &&
+    dataInt.active &&
     dataInt.score <= 7
   ) {
     return {
@@ -187,9 +217,10 @@ export function getChurnRisk(
 
   if (
     measurement &&
-    measurement.score <= 3 &&
+    measurement.score <= 2 &&
     budget &&
-    budget.score <= 7
+    budget.active &&
+    budget.score <= 5
   ) {
     return {
       risk: "high",
@@ -198,14 +229,16 @@ export function getChurnRisk(
     };
   }
 
-  if (score >= 75) {
+  const pct = computeScorePercent(dimensions);
+
+  if (pct >= 75) {
     return {
       risk: "low",
       detail:
-        "Strong overall fit. Advertisers scoring 75+ retain at 96% past Day 90 when early conversion traction is achieved.",
+        "Strong overall fit. Advertisers scoring 75%+ retain at 96% past Day 90 when early conversion traction is achieved.",
     };
   }
-  if (score >= 55) {
+  if (pct >= 55) {
     return {
       risk: "medium",
       detail:
@@ -232,8 +265,9 @@ export function detectRedFlags(dimensions: DimensionScore[]): RedFlag[] {
   const offer = get("offer");
   const audience = get("audience_supply");
   const regulatory = get("regulatory");
+  const industry = get("industry");
 
-  if (convCycle && convCycle.score <= 6 && dataInt && dataInt.score <= 7) {
+  if (convCycle && convCycle.score <= 3 && dataInt && dataInt.active && dataInt.score <= 7) {
     flags.push({
       title: "Downstream Optimization Trap",
       description:
@@ -243,7 +277,7 @@ export function detectRedFlags(dimensions: DimensionScore[]): RedFlag[] {
     });
   }
 
-  if (measurement && measurement.score <= 3 && budget && budget.score <= 10) {
+  if (measurement && measurement.score <= 2 && budget && budget.active && budget.score <= 8) {
     flags.push({
       title: "Measurement Misalignment Risk",
       description:
@@ -253,7 +287,7 @@ export function detectRedFlags(dimensions: DimensionScore[]): RedFlag[] {
     });
   }
 
-  if (offer && offer.score <= 4) {
+  if (offer && offer.active && offer.score <= 4) {
     flags.push({
       title: "Weak Offer",
       description:
@@ -263,7 +297,7 @@ export function detectRedFlags(dimensions: DimensionScore[]): RedFlag[] {
     });
   }
 
-  if (budget && budget.score <= 3) {
+  if (budget && budget.active && budget.score <= 2) {
     flags.push({
       title: "Insufficient Learning Budget",
       description:
@@ -273,7 +307,7 @@ export function detectRedFlags(dimensions: DimensionScore[]): RedFlag[] {
     });
   }
 
-  if (audience && audience.score <= 4) {
+  if (audience && audience.score <= 3) {
     flags.push({
       title: "Limited Supply Fit",
       description:
@@ -283,7 +317,7 @@ export function detectRedFlags(dimensions: DimensionScore[]): RedFlag[] {
     });
   }
 
-  if (regulatory && regulatory.score <= 2) {
+  if (regulatory && regulatory.score <= 0) {
     flags.push({
       title: "Regulatory Targeting Constraints",
       description:
@@ -293,25 +327,33 @@ export function detectRedFlags(dimensions: DimensionScore[]): RedFlag[] {
     });
   }
 
+  if (industry && industry.score <= 8) {
+    flags.push({
+      title: "Poor Industry Fit",
+      description:
+        "This vertical has fundamental structural challenges for transaction-moment advertising: long purchase cycles, no digital conversion path, wrong audience, or misaligned business model.",
+      pattern: "Structural misalignment",
+      severity: "critical",
+    });
+  }
+
   return flags;
 }
 
 // ─── Spend Projection ────────────────────────────────────────────────────────
 
-export function predictSpend(score: number): {
+export function predictSpend(scoreOrPercent: number, dimensions?: DimensionScore[]): {
   low: number;
   mid: number;
   high: number;
 } {
-  // Based on real Rokt advertiser data from GChat (2025-2026):
-  // Top performers: Capital One $185M+, Disney+ $40M, ASPCA $33M, Farmer's Dog $9K→$1M/mo in 2 months
-  // Scaling pattern: successful advertisers go $10K→$400-600K monthly in 2-4 months
-  if (score >= 85) return { low: 3_000_000, mid: 10_000_000, high: 40_000_000 };
-  if (score >= 75) return { low: 1_000_000, mid: 5_000_000, high: 15_000_000 };
-  if (score >= 65) return { low: 300_000, mid: 1_500_000, high: 5_000_000 };
-  if (score >= 55) return { low: 100_000, mid: 500_000, high: 2_000_000 };
-  if (score >= 45) return { low: 25_000, mid: 150_000, high: 500_000 };
-  if (score >= 35) return { low: 10_000, mid: 50_000, high: 150_000 };
+  const pct = dimensions ? computeScorePercent(dimensions) : scoreOrPercent;
+  if (pct >= 85) return { low: 3_000_000, mid: 10_000_000, high: 40_000_000 };
+  if (pct >= 75) return { low: 1_000_000, mid: 5_000_000, high: 15_000_000 };
+  if (pct >= 65) return { low: 300_000, mid: 1_500_000, high: 5_000_000 };
+  if (pct >= 55) return { low: 100_000, mid: 500_000, high: 2_000_000 };
+  if (pct >= 45) return { low: 25_000, mid: 150_000, high: 500_000 };
+  if (pct >= 35) return { low: 10_000, mid: 50_000, high: 150_000 };
   return { low: 0, mid: 15_000, high: 50_000 };
 }
 
@@ -321,12 +363,13 @@ export function generateRecommendations(
   dimensions: DimensionScore[]
 ): Recommendation[] {
   const recs: Recommendation[] = [];
-  const currentTotal = computeScore(dimensions);
+  const currentPct = computeScorePercent(dimensions);
 
   for (const dim of dimensions) {
+    // Skip inactive optional dimensions
+    if (dim.optional && !dim.active) continue;
     if (dim.score >= dim.maxScore) continue;
 
-    // Find the next option up
     const sortedOptions = [...dim.options].sort((a, b) => b.value - a.value);
     const currentIdx = sortedOptions.findIndex(
       (o) => o.value === dim.score
@@ -335,16 +378,22 @@ export function generateRecommendations(
 
     if (!betterOption) continue;
 
-    const newTotal = currentTotal - dim.score + betterOption.value;
-    const currentSpend = predictSpend(currentTotal);
-    const newSpend = predictSpend(newTotal);
+    // Simulate the score change
+    const newDimensions = dimensions.map((d) =>
+      d.id === dim.id ? { ...d, score: betterOption.value } : d
+    );
+    const newPct = computeScorePercent(newDimensions);
+    const currentGrade = getGrade(currentPct);
+    const newGrade = getGrade(newPct);
+    const currentSpend = predictSpend(currentPct);
+    const newSpend = predictSpend(newPct);
 
     recs.push({
       dimension: dim.name,
       currentScore: dim.score,
       potentialScore: betterOption.value,
       action: `Upgrade to "${betterOption.label}"${betterOption.description ? `: ${betterOption.description}` : ""}`,
-      impact: `Score: ${currentTotal} -> ${newTotal} (${getGrade(currentTotal)} -> ${getGrade(newTotal)})`,
+      impact: `Score: ${currentPct}% -> ${newPct}% (${currentGrade} -> ${newGrade})`,
       spendImpact:
         newSpend.mid > currentSpend.mid
           ? `Predicted spend: $${fmtM(currentSpend.mid)} -> $${fmtM(newSpend.mid)}`
@@ -352,7 +401,6 @@ export function generateRecommendations(
     });
   }
 
-  // Sort by impact (biggest score jump first)
   recs.sort(
     (a, b) =>
       b.potentialScore - b.currentScore - (a.potentialScore - a.currentScore)
@@ -398,7 +446,7 @@ const COMPARABLE_DB: {
     ],
   },
   {
-    industry: "Retail / E-commerce",
+    industry: "Online Retail / E-commerce",
     brands: [
       { name: "Sam's Club", industry: "Retail", outcome: "2.6x growth, $18M spend", similarity: "Membership retail", domain: "samsclub.com" },
       { name: "BJ's Wholesale", industry: "Retail", outcome: "Steady performer at $7.7M", similarity: "Warehouse club", domain: "bjs.com" },
@@ -441,7 +489,7 @@ const COMPARABLE_DB: {
     ],
   },
   {
-    industry: "Subscription / SaaS (consumer)",
+    industry: "Subscription / DTC",
     brands: [
       { name: "BarkBox", industry: "Subscription", outcome: "Strong DTC subscription, app-driven", similarity: "D2C subscription box", domain: "barkbox.com" },
       { name: "FabFitFun", industry: "Subscription", outcome: "Seasonal subscription, mass-market appeal", similarity: "D2C subscription box", domain: "fabfitfun.com" },
@@ -498,7 +546,7 @@ export function findComparables(enrichment: BrandEnrichment): Comparable[] {
     "Food Delivery / Meal Kits / QSR": "food meal delivery restaurant kitchen cook",
     "Streaming / Media": "stream video music podcast media content",
     "Finance / Fintech": "bank credit card payment lending loan finance fintech",
-    "Retail / E-commerce": "shop store retail ecommerce buy purchase merchandise",
+    "Online Retail / E-commerce": "shop store retail ecommerce buy purchase merchandise",
     "Insurance": "insurance coverage policy claim underwriting",
     "Gaming / Betting": "game gaming bet casino esport",
     "Travel / Hospitality": "travel hotel flight airline booking vacation",
@@ -530,7 +578,7 @@ export function findComparables(enrichment: BrandEnrichment): Comparable[] {
     if (match) return match.brands;
   }
 
-  // Final fallback: DTC/consumer brands (not top spenders)
+  // Final fallback
   return [
     { name: "Dollar Shave Club", industry: "D2C", outcome: "DTC pioneer, offer-driven acquisition", similarity: "Direct-to-consumer brand", domain: "dollarshaveclub.com" },
     { name: "Chewy", industry: "E-commerce", outcome: "Major DTC e-commerce, high retention", similarity: "Consumer e-commerce", domain: "chewy.com" },
@@ -545,18 +593,20 @@ export function buildScoreFromEnrichment(
 ): ScoreResult {
   const dimensions = mapEnrichmentToDimensions(enrichment);
   const totalScore = computeScore(dimensions);
-  const grade = getGrade(totalScore);
+  const maxPossibleScore = computeMaxPossible(dimensions);
+  const scorePercent = computeScorePercent(dimensions);
+  const grade = getGrade(scorePercent);
   const { risk: churnRisk, detail: churnRiskDetail } = getChurnRisk(
     totalScore,
     dimensions
   );
-  const predictedAnnualSpend = predictSpend(totalScore);
+  const predictedAnnualSpend = predictSpend(scorePercent);
   const redFlags = detectRedFlags(dimensions);
   const recommendations = generateRecommendations(dimensions);
   const comparables = findComparables(enrichment);
   const meetingBrief = generateMeetingBrief(
     enrichment,
-    totalScore,
+    scorePercent,
     grade,
     churnRisk,
     dimensions,
@@ -567,6 +617,8 @@ export function buildScoreFromEnrichment(
   return {
     brand: enrichment.name,
     totalScore,
+    maxPossibleScore,
+    scorePercent,
     grade,
     churnRisk,
     churnRiskDetail,
@@ -586,6 +638,21 @@ function mapEnrichmentToDimensions(
   enrichment: BrandEnrichment
 ): DimensionScore[] {
   return DIMENSIONS.map((dim) => {
+    // Optional dimensions start inactive (blank)
+    if (dim.optional) {
+      return {
+        id: dim.id,
+        name: dim.name,
+        score: 0,
+        maxScore: dim.maxScore,
+        rationale: "Not yet assessed — select a value to include in scoring",
+        selectedOption: "",
+        options: dim.options,
+        optional: true,
+        active: false,
+      };
+    }
+
     const { score, selectedOption, rationale } = matchEnrichmentToDimension(
       dim,
       enrichment
@@ -598,6 +665,8 @@ function mapEnrichmentToDimensions(
       rationale,
       selectedOption,
       options: dim.options,
+      optional: false,
+      active: true,
     };
   });
 }
@@ -606,7 +675,6 @@ function matchEnrichmentToDimension(
   dim: DimensionDef,
   enrichment: BrandEnrichment
 ): { score: number; selectedOption: string; rationale: string } {
-  // This maps the AI enrichment text to the best-matching option per dimension
   const fieldMap: Record<string, string> = {
     industry: enrichment.industry,
     offer: enrichment.offerPotential,
@@ -620,7 +688,6 @@ function matchEnrichmentToDimension(
 
   const fieldValue = (fieldMap[dim.id] || "").toLowerCase();
 
-  // Score each option by how well the enrichment text matches
   let bestMatch = dim.options[dim.options.length - 1]; // default to lowest
   let bestScore = -1;
 
@@ -649,7 +716,7 @@ function matchEnrichmentToDimension(
 
 function generateMeetingBrief(
   enrichment: BrandEnrichment,
-  totalScore: number,
+  scorePercent: number,
   grade: Grade,
   churnRisk: ChurnRisk,
   dimensions: DimensionScore[],
@@ -657,8 +724,11 @@ function generateMeetingBrief(
   comparables: Comparable[]
 ): string {
   const lines: string[] = [];
+  const activeDims = dimensions.filter((d) => !d.optional || d.active);
+  const maxPossible = computeMaxPossible(dimensions);
+
   lines.push(`# Meeting Brief: ${enrichment.name}`);
-  lines.push(`**ICP Score: ${totalScore}/100 (${grade}) | Churn Risk: ${churnRisk.toUpperCase()}**\n`);
+  lines.push(`**ICP Score: ${scorePercent}% (${computeScore(dimensions)}/${maxPossible}) | Grade: ${grade} | Churn Risk: ${churnRisk.toUpperCase()}**\n`);
 
   lines.push(`## Company Overview`);
   lines.push(`- Industry: ${enrichment.industry} / ${enrichment.subIndustry}`);
@@ -667,11 +737,20 @@ function generateMeetingBrief(
   lines.push(`- Digital Presence: ${enrichment.digitalPresence}\n`);
 
   lines.push(`## Key Talking Points`);
-  const topDims = [...dimensions].sort((a, b) => b.score / b.maxScore - a.score / a.maxScore).slice(0, 3);
+  const topDims = [...activeDims].sort((a, b) => b.score / b.maxScore - a.score / a.maxScore).slice(0, 3);
   for (const d of topDims) {
     lines.push(`- **${d.name} (${d.score}/${d.maxScore})**: ${d.rationale}`);
   }
   lines.push("");
+
+  const inactiveDims = dimensions.filter((d) => d.optional && !d.active);
+  if (inactiveDims.length > 0) {
+    lines.push(`## Dimensions to Assess`);
+    for (const d of inactiveDims) {
+      lines.push(`- **${d.name}**: Not yet assessed — gather this info during the meeting`);
+    }
+    lines.push("");
+  }
 
   if (redFlags.length > 0) {
     lines.push(`## Risk Areas to Address`);
