@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { enrichBrand } from "@/lib/enrichment";
 import { buildScoreFromEnrichment } from "@/lib/scoring";
-import { lookupHubSpotBrand } from "@/lib/hubspot";
+import { lookupRoktAdvertiser } from "@/lib/rokt-data";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -21,16 +21,11 @@ export async function POST(req: NextRequest) {
 
     const trimmedBrand = brand.trim();
 
-    // Run AI enrichment and HubSpot lookup in parallel
-    const [enrichment, hubspotData] = await Promise.all([
-      enrichBrand(trimmedBrand),
-      lookupHubSpotBrand(trimmedBrand).catch((err) => {
-        console.error("HubSpot lookup failed, continuing without CRM data:", err);
-        return undefined;
-      }),
-    ]);
+    // AI enrichment runs async; Rokt data lookup is a local file read (instant)
+    const [enrichment] = await Promise.all([enrichBrand(trimmedBrand)]);
+    const roktData = lookupRoktAdvertiser(trimmedBrand);
 
-    const result = buildScoreFromEnrichment(enrichment, hubspotData);
+    const result = buildScoreFromEnrichment(enrichment, roktData);
 
     return NextResponse.json(result);
   } catch (error) {

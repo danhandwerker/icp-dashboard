@@ -68,26 +68,14 @@ export interface BrandEnrichment {
   confidence: Confidence;
 }
 
-export interface HubSpotEnrichment {
+export interface RoktAdvertiserData {
   found: boolean;
-  companyId?: string;
-  companyName?: string;
-  domain?: string;
-  isExistingCustomer: boolean;
-  productStatus: Record<string, string>;
-  dealData?: {
-    dealId: string;
-    dealName: string;
-    amount: number | null;
-    stage: string;
-    ctlMethod: string | null;
-    technology: string | null;
-  };
+  advertiserName?: string;
+  isExistingAdvertiser: boolean;
   suggestedDimensions: {
     budget?: { score: number; label: string; rationale: string };
-    data_integration?: { score: number; label: string; rationale: string };
+    offer?: { score: number; label: string; rationale: string };
   };
-  hubspotUrl?: string;
 }
 
 export interface ScoreResult {
@@ -107,7 +95,7 @@ export interface ScoreResult {
   enrichment: BrandEnrichment;
   meetingBrief: string;
   scoredAt: string;
-  hubspotData?: HubSpotEnrichment;
+  roktData?: RoktAdvertiserData;
 }
 
 export interface SavedScore {

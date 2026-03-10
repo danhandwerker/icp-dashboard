@@ -8,7 +8,7 @@ import {
   Comparable,
   BrandEnrichment,
   ScoreResult,
-  HubSpotEnrichment,
+  RoktAdvertiserData,
 } from "./types";
 
 // ─── Dimension Definitions ───────────────────────────────────────────────────
@@ -591,13 +591,13 @@ export function findComparables(enrichment: BrandEnrichment): Comparable[] {
 
 export function buildScoreFromEnrichment(
   enrichment: BrandEnrichment,
-  hubspotEnrichment?: HubSpotEnrichment
+  roktData?: RoktAdvertiserData
 ): ScoreResult {
   let dimensions = mapEnrichmentToDimensions(enrichment);
 
-  // Apply CRM-sourced dimension suggestions when available
-  if (hubspotEnrichment?.found && hubspotEnrichment.suggestedDimensions) {
-    const { budget, data_integration } = hubspotEnrichment.suggestedDimensions;
+  // Apply Rokt data-sourced dimension suggestions when available
+  if (roktData?.found && roktData.suggestedDimensions) {
+    const { budget, offer } = roktData.suggestedDimensions;
     dimensions = dimensions.map((dim) => {
       if (dim.id === "budget" && budget) {
         return {
@@ -609,12 +609,12 @@ export function buildScoreFromEnrichment(
           source: "crm" as const,
         };
       }
-      if (dim.id === "data_integration" && data_integration) {
+      if (dim.id === "offer" && offer) {
         return {
           ...dim,
-          score: data_integration.score,
-          selectedOption: data_integration.label,
-          rationale: data_integration.rationale,
+          score: offer.score,
+          selectedOption: offer.label,
+          rationale: offer.rationale,
           active: true,
           source: "crm" as const,
         };
@@ -665,7 +665,7 @@ export function buildScoreFromEnrichment(
     enrichment,
     meetingBrief,
     scoredAt: new Date().toISOString(),
-    hubspotData: hubspotEnrichment,
+    roktData,
   };
 }
 

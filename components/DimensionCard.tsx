@@ -154,7 +154,7 @@ export default function DimensionCard({
             {dimension.source === "crm" && (
               <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
                 <Database className="w-2.5 h-2.5" />
-                CRM
+                Rokt
               </span>
             )}
             {/* Status badge for optional dimensions not filled from CRM */}

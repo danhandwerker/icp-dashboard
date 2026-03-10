@@ -22,7 +22,7 @@ import {
   detectRedFlags,
   generateRecommendations,
 } from "@/lib/scoring";
-import { Bookmark, BookmarkCheck, Link2, Pencil, Check, Sparkles, AlertCircle, Building2, ExternalLink } from "lucide-react";
+import { Bookmark, BookmarkCheck, Link2, Pencil, Check, Sparkles, AlertCircle, BarChart2 } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
 import ShareButton from "@/components/ShareButton";
 import { useFeedbackBrand } from "@/lib/feedback-context";
@@ -302,58 +302,13 @@ function DashboardContent() {
             </div>
           </div>
 
-          {/* HubSpot CRM Banner */}
-          {adjustedResult.hubspotData?.found && (
-            <div className="rounded-xl px-4 py-3 border border-white/8 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs"
+          {/* Rokt Advertiser Banner */}
+          {adjustedResult.roktData?.found && (
+            <div className="rounded-xl px-4 py-3 border flex items-center gap-3 text-xs"
               style={{ background: "rgba(59,130,246,0.05)", borderColor: "rgba(59,130,246,0.15)" }}>
-              <div className="flex items-center gap-2">
-                <Building2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                <span className="font-semibold text-blue-300">Found in HubSpot</span>
-                {adjustedResult.hubspotData.hubspotUrl && (
-                  <a
-                    href={adjustedResult.hubspotData.hubspotUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-400/70 hover:text-blue-300 transition-colors"
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
-              </div>
-              {adjustedResult.hubspotData.isExistingCustomer && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
-                  Existing Rokt Ads customer
-                </span>
-              )}
-              {adjustedResult.hubspotData.dealData && (
-                <span className="text-white/50">
-                  Deal:
-                  <span className="text-white/75 ml-1">
-                    {adjustedResult.hubspotData.dealData.amount
-                      ? `$${adjustedResult.hubspotData.dealData.amount.toLocaleString()}`
-                      : "no amount"}
-                  </span>
-                  {adjustedResult.hubspotData.dealData.stage && (
-                    <span className="ml-1 text-white/40">({adjustedResult.hubspotData.dealData.stage})</span>
-                  )}
-                </span>
-              )}
-              {Object.entries(adjustedResult.hubspotData.productStatus).length > 0 && (
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {Object.entries(adjustedResult.hubspotData.productStatus).map(([product, status]) => (
-                    <span
-                      key={product}
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-medium border ${
-                        status.toLowerCase().includes("active") || status.toLowerCase().includes("live")
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                          : "bg-white/5 text-white/40 border-white/10"
-                      }`}
-                    >
-                      {product}: {status}
-                    </span>
-                  ))}
-                </div>
-              )}
+              <BarChart2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+              <span className="font-semibold text-blue-300">Existing Rokt Advertiser</span>
+              <span className="text-white/50">Score informed by real platform data</span>
             </div>
           )}
 
