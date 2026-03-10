@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Sparkles, Loader2, Database } from "lucide-react";
 import type { DimensionScore, DimensionOption } from "@/lib/types";
 
 interface DimensionCardProps {
@@ -8,6 +9,7 @@ interface DimensionCardProps {
   onChange: (dimensionId: string, newScore: number, newOptionLabel: string) => void;
   onToggleActive?: (dimensionId: string, active: boolean) => void;
   animationDelay?: number;
+  brandName?: string;
 }
 
 function scoreBarColor(pct: number): string {
@@ -23,6 +25,7 @@ export default function DimensionCard({
   onChange,
   onToggleActive,
   animationDelay = 0,
+  brandName,
 }: DimensionCardProps) {
   const isInactive = dimension.optional && !dimension.active;
   const pct = isInactive ? 0 : dimension.score / dimension.maxScore;
@@ -32,6 +35,43 @@ export default function DimensionCard({
   const [flash, setFlash] = useState(false);
   const prevScoreRef = useRef(dimension.score);
   const animFrameRef = useRef<number | null>(null);
+
+  const [researching, setResearching] = useState(false);
+  const [researchError, setResearchError] = useState<string | null>(null);
+  const researchErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleResearch = async () => {
+    if (!brandName || researching) return;
+    setResearching(true);
+    setResearchError(null);
+
+    try {
+      const res = await fetch("/api/research-dimension", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brand: brandName, dimensionId: dimension.id }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Research failed");
+      }
+
+      // Activate the dimension if it was inactive, then apply the result
+      if (dimension.optional && !dimension.active && onToggleActive) {
+        onToggleActive(dimension.id, true);
+      }
+      onChange(dimension.id, data.score, data.label);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Research failed";
+      setResearchError(msg);
+      if (researchErrorTimerRef.current) clearTimeout(researchErrorTimerRef.current);
+      researchErrorTimerRef.current = setTimeout(() => setResearchError(null), 4000);
+    } finally {
+      setResearching(false);
+    }
+  };
 
   useEffect(() => {
     const targetPct = isInactive ? 0 : dimension.score / dimension.maxScore;
@@ -88,27 +128,55 @@ export default function DimensionCard({
     <div
       className={`card-surface p-4 animate-fade-in transition-all duration-300 ${
         flash ? "ring-1 ring-beetroot-light/40" : ""
-      } ${isInactive ? "opacity-60" : ""}`}
-      style={{ animationDelay: `${animationDelay}s` }}
+      } ${isInactive ? "" : ""}`}
+      style={{
+        animationDelay: `${animationDelay}s`,
+        ...(isInactive
+          ? {
+              borderLeft: "3px solid rgba(245, 158, 11, 0.6)",
+              background: "rgba(245, 158, 11, 0.04)",
+            }
+          : {}),
+      }}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-sm font-semibold text-white">{dimension.name}</h3>
-            {dimension.optional && (
-              <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
+            {/* Source badge: AI, CRM, or optional status */}
+            {!dimension.optional && dimension.source !== "crm" && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <Sparkles className="w-2.5 h-2.5" />
+                AI
+              </span>
+            )}
+            {dimension.source === "crm" && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                <Database className="w-2.5 h-2.5" />
+                CRM
+              </span>
+            )}
+            {/* Status badge for optional dimensions not filled from CRM */}
+            {dimension.optional && dimension.source !== "crm" && (
+              <span className={`inline-flex items-center gap-1.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
                 isInactive
-                  ? "bg-white/5 text-white/30 border border-white/10"
+                  ? "bg-amber-500/10 text-amber-400 border border-amber-500/25"
                   : "bg-beetroot/15 text-beetroot-light border border-beetroot/25"
               }`}>
+                {isInactive && (
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-400" />
+                  </span>
+                )}
                 {isInactive ? "Not included" : "User input"}
               </span>
             )}
           </div>
-          <p className="text-xs text-white/40 mt-0.5 leading-snug line-clamp-2">
+          <p className={`text-xs mt-0.5 leading-snug line-clamp-2 ${isInactive ? "text-amber-400/50" : "text-white/40"}`}>
             {isInactive
-              ? "Select a value to include this dimension in scoring"
+              ? "Select a value below to include this dimension"
               : (dimension.options.find((o) => o.label === dimension.selectedOption)?.description ?? "")}
           </p>
         </div>
@@ -163,6 +231,34 @@ export default function DimensionCard({
           </svg>
         </div>
       </div>
+
+      {/* Research this button — only for optional dimensions when brandName is available */}
+      {dimension.optional && brandName && (
+        <div className="mt-2 flex items-center gap-3">
+          <button
+            onClick={handleResearch}
+            disabled={researching}
+            className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-white/50 hover:text-white/80 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {researching ? (
+              <>
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Researching...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-3 h-3" />
+                Research this
+              </>
+            )}
+          </button>
+          {researchError && (
+            <span className="text-xs text-red-400/80 animate-fade-in">
+              {researchError}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Rationale */}
       {!isInactive && (
