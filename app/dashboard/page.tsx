@@ -22,8 +22,10 @@ import {
   detectRedFlags,
   generateRecommendations,
 } from "@/lib/scoring";
-import { Bookmark, BookmarkCheck, Link2, Pencil, Check } from "lucide-react";
+import { Bookmark, BookmarkCheck, Link2, Pencil, Check, Sparkles, AlertCircle, Building2, ExternalLink } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
+import ShareButton from "@/components/ShareButton";
+import { useFeedbackBrand } from "@/lib/feedback-context";
 
 function recalcResult(base: ScoreResult, newDimensions: ScoreResult["dimensions"]): ScoreResult {
   const totalScore = computeScore(newDimensions);
@@ -61,6 +63,8 @@ function DashboardContent() {
   const [editingDomain, setEditingDomain] = useState(false);
   const [domainInput, setDomainInput] = useState("");
 
+  const { setCurrentBrand } = useFeedbackBrand();
+
   const searchParams = useSearchParams();
   const router = useRouter();
   const autoScoredRef = useRef(false);
@@ -87,6 +91,7 @@ function DashboardContent() {
       const data: ScoreResult = await res.json();
       setResult(data);
       setAdjustedResult(data);
+      setCurrentBrand(data.brand);
 
       window.history.replaceState({}, "", `?brand=${encodeURIComponent(brand)}`);
     } catch (err) {
@@ -94,7 +99,7 @@ function DashboardContent() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [setCurrentBrand]);
 
   useEffect(() => {
     const brandParam = searchParams.get("brand");
@@ -111,7 +116,7 @@ function DashboardContent() {
 
       const newDimensions = adjustedResult.dimensions.map((d) =>
         d.id === dimensionId
-          ? { ...d, score: newScore, selectedOption: newLabel, active: true }
+          ? { ...d, score: newScore, selectedOption: newLabel, active: true, source: "user" as const }
           : d
       );
 
@@ -271,6 +276,15 @@ function DashboardContent() {
                 <Link2 className="w-4 h-4" />
                 {copyConfirm ? "Copied!" : "Copy Link"}
               </button>
+              <ShareButton
+                brand={adjustedResult.brand}
+                scorePercent={adjustedResult.scorePercent}
+                grade={adjustedResult.grade}
+                churnRisk={adjustedResult.churnRisk}
+                predictedSpend={adjustedResult.predictedAnnualSpend}
+                redFlagCount={adjustedResult.redFlags.length}
+                dimensions={adjustedResult.dimensions}
+              />
               <button
                 onClick={handleSave}
                 className={`btn-secondary px-4 py-2 rounded-lg text-sm flex items-center gap-2 ${
@@ -287,6 +301,61 @@ function DashboardContent() {
               </button>
             </div>
           </div>
+
+          {/* HubSpot CRM Banner */}
+          {adjustedResult.hubspotData?.found && (
+            <div className="rounded-xl px-4 py-3 border border-white/8 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs"
+              style={{ background: "rgba(59,130,246,0.05)", borderColor: "rgba(59,130,246,0.15)" }}>
+              <div className="flex items-center gap-2">
+                <Building2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                <span className="font-semibold text-blue-300">Found in HubSpot</span>
+                {adjustedResult.hubspotData.hubspotUrl && (
+                  <a
+                    href={adjustedResult.hubspotData.hubspotUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400/70 hover:text-blue-300 transition-colors"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+              {adjustedResult.hubspotData.isExistingCustomer && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+                  Existing Rokt Ads customer
+                </span>
+              )}
+              {adjustedResult.hubspotData.dealData && (
+                <span className="text-white/50">
+                  Deal:
+                  <span className="text-white/75 ml-1">
+                    {adjustedResult.hubspotData.dealData.amount
+                      ? `$${adjustedResult.hubspotData.dealData.amount.toLocaleString()}`
+                      : "no amount"}
+                  </span>
+                  {adjustedResult.hubspotData.dealData.stage && (
+                    <span className="ml-1 text-white/40">({adjustedResult.hubspotData.dealData.stage})</span>
+                  )}
+                </span>
+              )}
+              {Object.entries(adjustedResult.hubspotData.productStatus).length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {Object.entries(adjustedResult.hubspotData.productStatus).map(([product, status]) => (
+                    <span
+                      key={product}
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-medium border ${
+                        status.toLowerCase().includes("active") || status.toLowerCase().includes("live")
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                          : "bg-white/5 text-white/40 border-white/10"
+                      }`}
+                    >
+                      {product}: {status}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {activeTab === "brief" ? (
             <MeetingBrief brief={adjustedResult.meetingBrief} brand={adjustedResult.brand} />
@@ -344,21 +413,117 @@ function DashboardContent() {
 
               {/* Dimension Sliders */}
               <div>
-                <h3 className="text-lg font-semibold mb-1">
+                <h3 className="text-lg font-semibold mb-3">
                   Scoring dimensions
                 </h3>
-                <p className="text-sm text-gray-400 mb-4">
-                  Adjust to see what-if scenarios. Grayed-out dimensions are excluded from the score until you select a value.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {adjustedResult.dimensions.map((dim) => (
-                    <DimensionCard
-                      key={dim.id}
-                      dimension={dim}
-                      onChange={handleDimensionChange}
-                      onToggleActive={handleToggleActive}
-                    />
-                  ))}
+
+                {/* Summary banner */}
+                {(() => {
+                  const aiDims = adjustedResult.dimensions.filter((d) => !d.optional);
+                  const optionalDims = adjustedResult.dimensions.filter((d) => d.optional);
+                  const pendingCount = optionalDims.filter((d) => !d.active).length;
+                  const totalDims = adjustedResult.dimensions.length;
+                  const assessedCount = aiDims.length + optionalDims.filter((d) => d.active).length;
+
+                  return (
+                    <div className="flex items-center justify-between rounded-xl px-4 py-3 mb-5 border border-white/8"
+                      style={{ background: "rgba(255,255,255,0.03)" }}>
+                      <div className="flex items-center gap-3">
+                        {/* Mini segment progress */}
+                        <div className="flex items-center gap-0.5">
+                          {adjustedResult.dimensions.map((d) => {
+                            const isActive = !d.optional || d.active;
+                            return (
+                              <div
+                                key={d.id}
+                                className="h-2 w-4 rounded-sm transition-all duration-300"
+                                style={{
+                                  background: isActive
+                                    ? "#10b981"
+                                    : "rgba(245, 158, 11, 0.5)",
+                                }}
+                              />
+                            );
+                          })}
+                        </div>
+                        <span className="text-sm text-white/70">
+                          <span className="font-semibold text-emerald-400">{assessedCount}</span>
+                          <span className="text-white/40"> of </span>
+                          <span className="font-semibold text-white/70">{totalDims}</span>
+                          <span className="text-white/40"> dimensions assessed</span>
+                        </span>
+                      </div>
+                      {pendingCount > 0 && (
+                        <div className="flex items-center gap-1.5 text-xs text-amber-400">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>
+                            <span className="font-semibold">{pendingCount}</span>
+                            {pendingCount === 1 ? " dimension needs" : " dimensions need"} your input
+                          </span>
+                        </div>
+                      )}
+                      {pendingCount === 0 && (
+                        <div className="flex items-center gap-1.5 text-xs text-emerald-400">
+                          <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                          <span>All dimensions included</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                {/* AI-Assessed group */}
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      AI-Assessed
+                    </span>
+                    <div className="flex-1 h-px bg-emerald-500/15" />
+                    <span className="text-xs text-white/30">
+                      {adjustedResult.dimensions.filter((d) => !d.optional).length} dimensions
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {adjustedResult.dimensions
+                      .filter((d) => !d.optional)
+                      .map((dim) => (
+                        <DimensionCard
+                          key={dim.id}
+                          dimension={dim}
+                          onChange={handleDimensionChange}
+                          onToggleActive={handleToggleActive}
+                          brandName={adjustedResult.brand}
+                        />
+                      ))}
+                  </div>
+                </div>
+
+                {/* Needs Your Input group */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-400">
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      Needs Your Input
+                    </span>
+                    <div className="flex-1 h-px bg-amber-500/15" />
+                    <span className="text-xs text-white/30">
+                      Select values below to refine the score
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {adjustedResult.dimensions
+                      .filter((d) => d.optional)
+                      .map((dim) => (
+                        <DimensionCard
+                          key={dim.id}
+                          dimension={dim}
+                          onChange={handleDimensionChange}
+                          onToggleActive={handleToggleActive}
+                          brandName={adjustedResult.brand}
+                        />
+                      ))}
+                  </div>
                 </div>
               </div>
 

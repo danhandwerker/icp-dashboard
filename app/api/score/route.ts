@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { enrichBrand } from "@/lib/enrichment";
 import { buildScoreFromEnrichment } from "@/lib/scoring";
+import { lookupHubSpotBrand } from "@/lib/hubspot";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -18,8 +19,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const enrichment = await enrichBrand(brand.trim());
-    const result = buildScoreFromEnrichment(enrichment);
+    const trimmedBrand = brand.trim();
+
+    // Run AI enrichment and HubSpot lookup in parallel
+    const [enrichment, hubspotData] = await Promise.all([
+      enrichBrand(trimmedBrand),
+      lookupHubSpotBrand(trimmedBrand).catch((err) => {
+        console.error("HubSpot lookup failed, continuing without CRM data:", err);
+        return undefined;
+      }),
+    ]);
+
+    const result = buildScoreFromEnrichment(enrichment, hubspotData);
 
     return NextResponse.json(result);
   } catch (error) {

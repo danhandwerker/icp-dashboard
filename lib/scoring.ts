@@ -8,6 +8,7 @@ import {
   Comparable,
   BrandEnrichment,
   ScoreResult,
+  HubSpotEnrichment,
 } from "./types";
 
 // ─── Dimension Definitions ───────────────────────────────────────────────────
@@ -589,9 +590,42 @@ export function findComparables(enrichment: BrandEnrichment): Comparable[] {
 // ─── Full Score Builder ──────────────────────────────────────────────────────
 
 export function buildScoreFromEnrichment(
-  enrichment: BrandEnrichment
+  enrichment: BrandEnrichment,
+  hubspotEnrichment?: HubSpotEnrichment
 ): ScoreResult {
-  const dimensions = mapEnrichmentToDimensions(enrichment);
+  let dimensions = mapEnrichmentToDimensions(enrichment);
+
+  // Apply CRM-sourced dimension suggestions when available
+  if (hubspotEnrichment?.found && hubspotEnrichment.suggestedDimensions) {
+    const { budget, data_integration } = hubspotEnrichment.suggestedDimensions;
+    dimensions = dimensions.map((dim) => {
+      if (dim.id === "budget" && budget) {
+        return {
+          ...dim,
+          score: budget.score,
+          selectedOption: budget.label,
+          rationale: budget.rationale,
+          active: true,
+          source: "crm" as const,
+        };
+      }
+      if (dim.id === "data_integration" && data_integration) {
+        return {
+          ...dim,
+          score: data_integration.score,
+          selectedOption: data_integration.label,
+          rationale: data_integration.rationale,
+          active: true,
+          source: "crm" as const,
+        };
+      }
+      return dim.optional ? dim : { ...dim, source: "ai" as const };
+    });
+  } else {
+    dimensions = dimensions.map((dim) =>
+      dim.optional ? dim : { ...dim, source: "ai" as const }
+    );
+  }
   const totalScore = computeScore(dimensions);
   const maxPossibleScore = computeMaxPossible(dimensions);
   const scorePercent = computeScorePercent(dimensions);
@@ -631,6 +665,7 @@ export function buildScoreFromEnrichment(
     enrichment,
     meetingBrief,
     scoredAt: new Date().toISOString(),
+    hubspotData: hubspotEnrichment,
   };
 }
 

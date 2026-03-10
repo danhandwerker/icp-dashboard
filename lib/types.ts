@@ -14,6 +14,7 @@ export interface DimensionScore {
   options: DimensionOption[];
   optional?: boolean;
   active?: boolean;
+  source?: "ai" | "crm" | "user";
 }
 
 export interface DimensionOption {
@@ -67,6 +68,28 @@ export interface BrandEnrichment {
   confidence: Confidence;
 }
 
+export interface HubSpotEnrichment {
+  found: boolean;
+  companyId?: string;
+  companyName?: string;
+  domain?: string;
+  isExistingCustomer: boolean;
+  productStatus: Record<string, string>;
+  dealData?: {
+    dealId: string;
+    dealName: string;
+    amount: number | null;
+    stage: string;
+    ctlMethod: string | null;
+    technology: string | null;
+  };
+  suggestedDimensions: {
+    budget?: { score: number; label: string; rationale: string };
+    data_integration?: { score: number; label: string; rationale: string };
+  };
+  hubspotUrl?: string;
+}
+
 export interface ScoreResult {
   brand: string;
   totalScore: number;
@@ -84,6 +107,7 @@ export interface ScoreResult {
   enrichment: BrandEnrichment;
   meetingBrief: string;
   scoredAt: string;
+  hubspotData?: HubSpotEnrichment;
 }
 
 export interface SavedScore {
